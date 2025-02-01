@@ -1,0 +1,145 @@
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPen,  } from "@fortawesome/free-solid-svg-icons";
+import { faPenFancy } from "@fortawesome/free-solid-svg-icons";
+
+import { FaCheckCircle } from "react-icons/fa";
+import TimeLine from "./TimeLine";
+import FormComponent from "./FormComponent";
+import React from 'react';
+import { PencilIcon, EyeIcon } from 'lucide-react';
+import SuggestionBox from "./SuggestionBox";
+import {useState, useEffect} from "react";
+import axios from "axios";
+
+
+export default function AddPost() {
+
+    const [query, setQuery] = useState('');
+  const [suggestions, setSuggestions] = useState([]);
+
+  //We will load this tags suggestions from the database
+
+  const [allSuggestions, setAllSuggestions] = useState([]);
+
+  useEffect(()=>{
+    getAllTags();
+  },[])
+  
+
+  const handleChange = (e) => {
+    const value = e.target.value;
+    setQuery(value);
+    
+    if (value) {
+      // Filter suggestions based on the input
+      const filteredSuggestions = allSuggestions.filter((item) =>
+        item.tagName.toLowerCase().includes(value.toLowerCase())
+      );
+      setSuggestions(filteredSuggestions);
+    } else {
+      setSuggestions([]);
+    }
+  };
+
+  const handleSuggestionClick = (suggestion) => {
+    setQuery(suggestion);
+    setSuggestions([]);
+  };
+
+  const getAllTags=async()=>{
+    // e.preventDefault();
+    try{
+        const response = await axios.get(
+            `http://localhost:8080/getAllTags`
+          );
+
+          if(response!==null){
+            console.log(response);
+            setAllSuggestions(response.data);
+          }
+    }catch(Error){
+        console.log(Error);
+    }
+  }
+
+  return (
+    <>
+    <div style={{textAlign:"center"}}>
+      {/* <FontAwesomeIcon icon={faPen} style={{ color: "blue", fontSize: "24px" }} />   */}
+      <FontAwesomeIcon icon={faPenFancy} size="2x" style={{ color: "blue" }} />
+      <h1 className="text-3xl">Start a discussion!</h1>
+      <span>Post your thoughts and engage with the community.</span>
+      
+    </div>
+
+<TimeLine/>
+
+<div>
+    <b>Ask Question</b>
+    <div>Be specific and imagine you’re asking a question to another person.</div>
+    {/* <textarea id="about" name="about" rows="3" style={{width:"500px", border:'2px solid black'}} className="ky vo agd aoc aty auk ayn baw bhh bhj bhm bqb bzo bzq bzx dai"></textarea> */}
+    <textarea
+        id="response"
+        rows="6"
+        placeholder="Write your Question here..."
+        style={{padding:"10px"}}
+        className="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+      ></textarea>
+      <b>Tags</b>
+    <div>Add up to 5 tags to describe what your question is about. Start typing to see suggestions.</div>
+      <input
+        id="textbox"
+        type="text"
+        value={query}
+        onChange={handleChange}
+        style={{padding:"10px"}}
+        placeholder="Type something..."
+        className="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+      />
+      {suggestions.length > 0 && (
+        <ul
+          style={{
+            // position: 'absolute',
+            top: '100%',
+            left: 0,
+            right: 0,
+            margin: 0,
+            padding: '0',
+            backgroundColor: '#fff',
+            border: '1px solid #ccc',
+            borderRadius: '5px',
+            maxHeight: '150px',
+            overflowY: 'auto',
+          }}
+        >
+          {suggestions.map((suggestion, index) => (
+            <li
+              key={index}
+              onClick={() => handleSuggestionClick(suggestion)}
+              style={{
+                padding: '8px',
+                cursor: 'pointer',
+                listStyle: 'none',
+                borderBottom: '1px solid #eee',
+              }}
+            >
+              {suggestion.tagName}
+            </li>
+          ))}
+        </ul>
+      )}
+</div>
+
+<div className="flex gap-3 justify-end mt-6">
+      <button 
+      style={{padding:"10px"}}
+        className="flex items-center gap-2 px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+      >
+        <PencilIcon size={19} />
+        Post Question
+      </button>
+    </div>
+{/* <StepIndicator/> */}
+</>
+  );
+}

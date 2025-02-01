@@ -32,10 +32,10 @@ const Navbar = () => {
 
           {/* Navigation Links */}
           <div className="hidden md:flex items-center ml-4 space-x-1">
-            <button className="px-3 py-2 hover:bg-gray-100 rounded-md text-sm">Products</button>
+            {/* <button className="px-3 py-2 hover:bg-gray-100 rounded-md text-sm">Products</button>
             <a href="/questions" className="px-3 py-2 hover:bg-gray-100 rounded-md text-sm">Questions</a>
             <a href="/tags" className="px-3 py-2 hover:bg-gray-100 rounded-md text-sm">Tags</a>
-            <a href="/users" className="px-3 py-2 hover:bg-gray-100 rounded-md text-sm">Users</a>
+            <a href="/users" className="px-3 py-2 hover:bg-gray-100 rounded-md text-sm">Users</a> */}
           </div>
 
           {/* Search Bar */}

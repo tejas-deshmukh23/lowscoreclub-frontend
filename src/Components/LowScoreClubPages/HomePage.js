@@ -9,10 +9,18 @@ import Navbar from "../Header/navbar";
 import QuestionList from '../QuestionList/QuestionList';
 import AskQuestionModule from "../UserInputs/AskQuestionModule";
 import Sidebar from "../Sidebar/Sidebar";
+import AddPost from '../UserInputs/AddPost';
 
 const HomePage = () => {
 
+    const [showComponents, setShowComponents] = useState(true);
     const [askedQuestionPanel, setAskedQuestionPanel] = useState(false);
+
+    const handleToggleVisibility = () => {
+        setShowComponents(!showComponents);
+    };
+
+    
 
     return (
 
@@ -37,8 +45,9 @@ const HomePage = () => {
                         {/* style={{backgroundColor:'rgb(252 246 252)'}} */}
                         <div className="min-h-screen bg-gray-50 " >
                             <div className="flex-1 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                                <AskQuestionModule />
-                                <QuestionList />
+                            {showComponents && <AskQuestionModule onToggleVisibility={handleToggleVisibility} />}
+                                {showComponents && <QuestionList />}
+                                {!showComponents && <AddPost/>}
                             </div>
                         </div>
 
