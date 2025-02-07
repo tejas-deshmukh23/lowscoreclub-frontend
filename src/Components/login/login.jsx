@@ -4,6 +4,9 @@ import React, { useState } from 'react';
 import { AlertCircle, CheckCircle2 } from 'lucide-react';
 import axios from 'axios';
 
+import { getToken, setToken } from '../utils/auth';
+import {decodeToken } from '../utils/auth';
+
 const CustomAlert = ({ children, type }) => {
   const bgColor = type === 'success' ? 'bg-green-50' : 'bg-red-50';
   const textColor = type === 'success' ? 'text-green-700' : 'text-red-700';
@@ -62,15 +65,17 @@ const Login = () => {
         formData2.append('password', formData.password);
 
         const response = await axios.post(
-          'http://localhost:8080/api/auth/login',
+          'http://localhost:8080/api/auth/validate',
           formData2
         );
 
         if (response.status === 200) {
           setSuccess(true);
           setErrors({});
+          setToken(response.data.token);
+          window.location.href = "http://localhost:3000/homepage";
           // Handle successful login (e.g., store token, redirect)
-          console.log('Login successful');
+          // console.log('Login successful');
         }
       } catch (error) {
         setErrors({ 

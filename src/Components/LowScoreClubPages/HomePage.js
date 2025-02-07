@@ -10,8 +10,16 @@ import QuestionList from '../QuestionList/QuestionList';
 import AskQuestionModule from "../UserInputs/AskQuestionModule";
 import Sidebar from "../Sidebar/Sidebar";
 import AddPost from '../UserInputs/AddPost';
+import { useRouter } from 'next/router';
+import { QuestionsProvider } from '@/context/QuestionContext';
 
-const HomePage = () => {
+import { usePathname } from 'next/navigation';
+
+
+const HomePage = ({ children }) => {
+
+    const pathname = usePathname();
+    const childrenPaths = ['/homepage', '/'];
 
     const [showComponents, setShowComponents] = useState(true);
     const [askedQuestionPanel, setAskedQuestionPanel] = useState(false);
@@ -20,11 +28,21 @@ const HomePage = () => {
         setShowComponents(!showComponents);
     };
 
-    
+    // if (childrenPaths.includes(pathname)) {
+    //     return(
+    //         <>
+    //              {showComponents && <AskQuestionModule onToggleVisibility={handleToggleVisibility} />}
+    //                                     {showComponents && <QuestionList />}
+    //                                     {!showComponents && <AddPost />}
+    //         </>
+    //     );
+    // }
 
     return (
 
         <>
+
+        {console.log(children)}
             <div>
                 {<Navbar />}
             </div>
@@ -45,9 +63,32 @@ const HomePage = () => {
                         {/* style={{backgroundColor:'rgb(252 246 252)'}} */}
                         <div className="min-h-screen bg-gray-50 " >
                             <div className="flex-1 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                            {showComponents && <AskQuestionModule onToggleVisibility={handleToggleVisibility} />}
-                                {showComponents && <QuestionList />}
-                                {!showComponents && <AddPost/>}
+                            {children ? (
+                                    <>
+
+                                        {
+                                            (childrenPaths.includes(pathname)?(<>
+                                                {showComponents && <AskQuestionModule onToggleVisibility={handleToggleVisibility} />}
+                                        {showComponents && <QuestionList />}
+                                        {!showComponents && <AddPost />}
+                                            </>):(<>
+                                                <QuestionsProvider>
+                                                {children}
+                                                </QuestionsProvider>
+                                            </>))
+                                        }
+
+                                        
+
+                                        
+
+                                    </>
+                                ) : (
+                                    <>
+                                        
+                                    </>
+                                )}
+
                             </div>
                         </div>
 

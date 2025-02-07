@@ -1,5 +1,10 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import HomePage from "@/Components/LowScoreClubPages/HomePage";
+// import { QuestionsProvider } from "@/context/QuestionContext";
+// import {QuestionsProvider} from "../context/QuestionContext";
+
+import { QuestionsProvider } from "@/context/QuestionContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -22,7 +27,13 @@ export default function RootLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+
+        <QuestionsProvider>
+          <HomePage>
+            {children}
+          </HomePage>
+        </QuestionsProvider>
+
       </body>
     </html>
   );
