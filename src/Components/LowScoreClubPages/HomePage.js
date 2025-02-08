@@ -11,7 +11,8 @@ import AskQuestionModule from "../UserInputs/AskQuestionModule";
 import Sidebar from "../Sidebar/Sidebar";
 import AddPost from '../UserInputs/AddPost';
 import { useRouter } from 'next/router';
-import { QuestionsProvider } from '@/context/QuestionContext';
+// import { QuestionsProvider } from '@/context/QuestionContext';
+import {QuestionsProvider} from "../../context/QuestionContext";
 
 import { usePathname } from 'next/navigation';
 
@@ -72,9 +73,9 @@ const HomePage = ({ children }) => {
                                         {showComponents && <QuestionList />}
                                         {!showComponents && <AddPost />}
                                             </>):(<>
-                                                <QuestionsProvider>
+                                                {/* <QuestionsProvider> */}
                                                 {children}
-                                                </QuestionsProvider>
+                                                {/* </QuestionsProvider> */}
                                             </>))
                                         }
 

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useQuestions } from '@/context/QuestionContext';
+// import { useQuestions } from '@/context/QuestionContext';
+import { useQuestions } from "../../context/QuestionContext";
+import Link from 'next/link';
 
 const QuestionList = () => {
 
@@ -96,7 +98,10 @@ const QuestionList = () => {
                   {/* Question Content */}
                   <div className="flex-1">
                     <h2 className="text-xl font-medium text-blue-600 hover:text-blue-700 mb-2">
-                      <a href={`/questions/${question.id}`}>{question.postDetails || "No Title"}</a>
+                      {/* <a href={`/questions/${question.id}`}>{question.postDetails || "No Title"}</a> */}
+                      <Link href={`/questions/${question.id}`}>
+    {question.postDetails || "No Title"}
+</Link>
                     </h2>
                     <p className="text-gray-600 mb-4 line-clamp-2">{question.postDetails}</p>
                     <div className="flex justify-between items-center">

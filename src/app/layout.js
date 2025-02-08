@@ -2,9 +2,9 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import HomePage from "@/Components/LowScoreClubPages/HomePage";
 // import { QuestionsProvider } from "@/context/QuestionContext";
-// import {QuestionsProvider} from "../context/QuestionContext";
+import {QuestionsProvider} from "../context/QuestionContext";
 
-import { QuestionsProvider } from "@/context/QuestionContext";
+// import { QuestionsProvider } from "@/context/QuestionContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
