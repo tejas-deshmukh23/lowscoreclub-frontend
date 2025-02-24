@@ -1,4 +1,4 @@
-"use client"
+// "use client"
 
 import QRPageContainer from "@/Components/QuestionResponsePages/QRPageContainer";
 // import { QuestionsProvider } from "@/context/QuestionContext";

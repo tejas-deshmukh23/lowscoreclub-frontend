@@ -10,6 +10,13 @@ const QuestionsContext = createContext({
 
 // Provider component
 export const QuestionsProvider = ({ children }) => {
+
+  useEffect(()=>{
+    if (typeof window === 'undefined') {
+        return null; // Don't render anything during SSR
+      }
+},[])
+
   const [questions2, setQuestions] = useState([]);
 
   // Monitoring changes to questions2

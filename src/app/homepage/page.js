@@ -1,3 +1,4 @@
+"use client"
 import React from 'react'
 import HomePage from "../../Components/LowScoreClubPages/HomePage";
 // import Layout from "../../Components/Layout";

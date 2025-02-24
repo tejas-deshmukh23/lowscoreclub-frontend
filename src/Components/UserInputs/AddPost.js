@@ -158,6 +158,25 @@ export default function AddPost() {
       const response = await axios.post(`${process.env.NEXT_PUBLIC_SPRING_URL}addpost`, formData);
       // const response2 = await axios.post("http://localhost:8080/addpost");
 
+      if(response.status === 200){
+        setPostData(prevState => (
+          {
+            ...prevState,
+            description : ''
+          }
+        ))
+
+
+        const response2 = await axios.post(`${process.env.NEXT_PUBLIC_SPRING_URL}api/notifications/send`,{
+          body : JSON.stringify({
+            message: 'Test notification'
+          })
+        });
+
+         console.log("push notification response is : ",response2);
+
+      }
+
     } catch (Error) {
       console.log(Error);
     }

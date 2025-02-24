@@ -12,18 +12,85 @@ import Sidebar from "../Sidebar/Sidebar";
 import AddPost from '../UserInputs/AddPost';
 import { useRouter } from 'next/router';
 // import { QuestionsProvider } from '@/context/QuestionContext';
-import {QuestionsProvider} from "../../context/QuestionContext";
+import { QuestionsProvider } from "../../context/QuestionContext";
 
 import { usePathname } from 'next/navigation';
 
 
 const HomePage = ({ children }) => {
 
+    const [mounted, setMounted] = useState(false);
+    const [permission, setPermission] = useState('default');
     const pathname = usePathname();
     const childrenPaths = ['/homepage', '/'];
 
     const [showComponents, setShowComponents] = useState(true);
     const [askedQuestionPanel, setAskedQuestionPanel] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    
+
+    // useEffect(()=>{
+    //     console.log("Inside the homepage useEffect before the if");
+    //     if (typeof window === 'undefined') {
+    //         console.log("Inside the homepage under if");
+    //         return null; // Don't render anything during SSR
+    //       }
+    // },[])
+
+    // if (typeof window === 'undefined') {
+    //     console.log("When windows is undefined");
+    //     return null; // Don't render anything during SSR
+    //   }
+
+
+  
+
+    useEffect(() => {
+        if (!mounted) return; 
+        requestPermission();
+        if (typeof window !== 'undefined') {
+          setPermission(Notification.permission);
+        }
+      }, [mounted]);
+
+      const requestPermission = async () => {
+        try {
+          const result = await Notification.requestPermission();
+          console.log("The result after getting the permission :: ",result);
+          setPermission(result);
+        } catch (error) {
+          console.error('Error requesting notification permission:', error);
+        }
+      };
+    
+      
+    useEffect(() => {
+        if (!mounted) return; 
+        const socket = new WebSocket("ws://localhost:8080/ws/notifications");
+
+        socket.onopen = () => {
+            console.log("Connected to WebSocket server");
+        };
+
+        socket.onmessage = (event) => {
+            const message = event.data;
+            console.log("Received message:", message);
+            alert(message); // Display notification to the user
+        };
+
+        socket.onclose = () => {
+            console.log("Disconnected from WebSocket server");
+        };
+
+        // Cleanup WebSocket connection on component unmount
+        return () => {
+            socket.close();
+        };
+    }, [mounted]);
 
     const handleToggleVisibility = () => {
         setShowComponents(!showComponents);
@@ -39,11 +106,16 @@ const HomePage = ({ children }) => {
     //     );
     // }
 
+    // Handle any client-side only rendering
+    if (!mounted) {
+        return <div className="min-h-screen">Loading...</div>; // Show a loading state
+    }
+
     return (
 
         <>
 
-        {console.log(children)}
+            {console.log(children)}
             <div>
                 {<Navbar />}
             </div>
@@ -64,29 +136,29 @@ const HomePage = ({ children }) => {
                         {/* style={{backgroundColor:'rgb(252 246 252)'}} */}
                         <div className="min-h-screen bg-gray-50 " >
                             <div className="flex-1 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                            {children ? (
+                                {children ? (
                                     <>
 
                                         {
-                                            (childrenPaths.includes(pathname)?(<>
+                                            (childrenPaths.includes(pathname) ? (<>
                                                 {showComponents && <AskQuestionModule onToggleVisibility={handleToggleVisibility} />}
-                                        {showComponents && <QuestionList />}
-                                        {!showComponents && <AddPost />}
-                                            </>):(<>
+                                                {showComponents && <QuestionList />}
+                                                {!showComponents && <AddPost />}
+                                            </>) : (<>
                                                 {/* <QuestionsProvider> */}
                                                 {children}
                                                 {/* </QuestionsProvider> */}
                                             </>))
                                         }
 
-                                        
 
-                                        
+
+
 
                                     </>
                                 ) : (
                                     <>
-                                        
+
                                     </>
                                 )}
 
