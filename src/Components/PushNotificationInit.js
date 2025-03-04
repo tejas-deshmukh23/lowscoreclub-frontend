@@ -23,13 +23,33 @@ export function PushNotificationInit() {
       });
 
       // Send subscription to backend
-      await fetch('http://localhost:8080/api/notifications/subscribe', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(subscription)
-      });
+      // await fetch('http://localhost:8080/api/notifications/subscribe', {
+      //   method: 'POST',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //   },
+      //   body: JSON.stringify(subscription)
+      // });
+
+      try{
+        const response = await axios.post(
+          `${process.env.NEXT_PUBLIC_SPRING_URL}api/notifications/subscribe`,
+          subscription,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+
+        if(response.status === 200){
+          console.log("When response is 200");
+        }
+
+      }catch(Error){
+        console.log("Subscription Error : ",Error);
+      }
+      
       
       console.log('Push notification subscription successful');
     } catch (error) {

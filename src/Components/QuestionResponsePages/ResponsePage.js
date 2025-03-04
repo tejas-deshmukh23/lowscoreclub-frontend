@@ -31,6 +31,7 @@ const ResponsePage = ({ params }) => {
 
   const [likeCounts, setLikeCounts] = useState({});
 const [dislikeCounts, setDislikeCounts] = useState({});
+const [responseCount, setResponseCounts] = useState({});
 
   useEffect(() => {
     console.log("Inside useEffect");
@@ -255,6 +256,8 @@ const [dislikedResponses, setDislikedResponses] = useState({});
     }
   }
 
+  
+
   const handleDislikeCount = async (postId) => {
     try {
       const formData1 = new FormData();
@@ -345,6 +348,7 @@ const [dislikedResponses, setDislikedResponses] = useState({});
       handleIsVoted(question.responseId, question.createdById);
       handleLikeCount(question.responseId);
       handleDislikeCount(question.responseId);
+      // handleResponseCount(question.response.Id);
     });
 
   },[questions]); //This hook will run everytime 'questions' changes

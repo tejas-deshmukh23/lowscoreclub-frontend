@@ -11,10 +11,14 @@ const QuestionsContext = createContext({
 // Provider component
 export const QuestionsProvider = ({ children }) => {
 
-  useEffect(()=>{
-    if (typeof window === 'undefined') {
-        return null; // Don't render anything during SSR
-      }
+//   useEffect(()=>{
+//     if (typeof window === 'undefined') {
+//         return null; // Don't render anything during SSR
+//       }
+// },[])
+
+useEffect(()=>{
+  
 },[])
 
   const [questions2, setQuestions] = useState([]);

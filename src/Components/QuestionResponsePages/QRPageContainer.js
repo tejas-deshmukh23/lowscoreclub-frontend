@@ -9,11 +9,15 @@ import {useState, useEffect} from 'react';
 import { getToken, setToken } from '../utils/auth';
 import { decodeToken } from '../utils/auth';
 import ResponsePage from './ResponsePage';
+import { useRouter } from 'next/navigation';
 
 const QRPageContainer = ({params}) => {
 
+  const router = useRouter();
+
   useEffect(()=>{
     console.log("Hey");
+    console.log("The params are :: ",params);
   },[]);
 
   const [user, setUser] = useState({});
@@ -66,8 +70,12 @@ const QRPageContainer = ({params}) => {
   const getAllTags = async () => {
     // e.preventDefault();
     try {
+      // const response = await axios.get(
+      //   `http://localhost:8080/getAllTags`
+      // );
+
       const response = await axios.get(
-        `http://localhost:8080/getAllTags`
+        `${process.env.NEXT_PUBLIC_SPRING_URL}getAllTags`
       );
 
       if (response !== null) {
@@ -86,6 +94,12 @@ const QRPageContainer = ({params}) => {
   
 
   const handlePostAnswer = () => {
+    if (Object.keys(user).length === 0) {
+      router.push("/login");
+      return null;
+    }
+
+    
     try{
 
       // const foundTags = allSuggestions.filter(word => {
@@ -121,6 +135,10 @@ const QRPageContainer = ({params}) => {
 
       if(response.status.code === 200){
         console.log("Answer posted successfully");
+        setPostData(prevState => ({
+          ...prevState,           // Keep all the existing properties
+          description: null       // Set description to null
+        }));
 
         const response2 = axios.post(`${process.env.NEXT_PUBLIC_SPRING_URL}send`,{
           body : JSON.stringify({
@@ -137,6 +155,7 @@ const QRPageContainer = ({params}) => {
     {
       console.log(Error);
     }
+    
   }
 
   const handleChange2 = (e) => {
@@ -160,6 +179,7 @@ const QRPageContainer = ({params}) => {
         <div>
             <QuestionPage params={params}/>
         </div>
+
         
         <div style={{marginLeft:"80px", marginTop:'50px'}}>
           
@@ -189,7 +209,7 @@ const QRPageContainer = ({params}) => {
 
 <div className="flex gap-3 justify-end mt-6">
         <button
-          style={{ padding: "10px" }}
+          style={{ padding: "10px", backgroundColor:"#6039D2" }}
           className="flex items-center gap-2 px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
           onClick={handlePostAnswer}
         >

@@ -87,13 +87,23 @@ const SignupPage = () => {
     setUserNameExists(false);
 
     try {
-      const response = await fetch('http://localhost:8080/api/auth/send-otp', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email: formData.email }),
-      });
+      // const response = await fetch('http://localhost:8080/api/auth/send-otp', {
+      //   method: 'POST',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //   },
+      //   body: JSON.stringify({ email: formData.email }),
+      // });
+
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_SPRING_URL}api/auth/send-otp`,
+        { email: formData.email },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
       
       if (response.ok) {
         setOtpData(prev => ({ ...prev, isOtpSent: true }));
@@ -108,16 +118,29 @@ const SignupPage = () => {
 
   const handleVerifyOtp = async () => {
     try {
-      const response = await fetch('http://localhost:8080/api/auth/verify-otp', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      // const response = await fetch('http://localhost:8080/api/auth/verify-otp', {
+      //   method: 'POST',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //   },
+      //   body: JSON.stringify({
+      //     email: formData.email,
+      //     otp: otpData.otp,
+      //   }),
+      // });
+
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_SPRING_URL}api/auth/verify-otp`,
+        {
           email: formData.email,
           otp: otpData.otp,
-        }),
-      });
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
       
       if (response.ok) {
         setOtpData(prev => ({ ...prev, isOtpVerified: true }));
@@ -198,10 +221,11 @@ const SignupPage = () => {
 
         // const response = await axios.post(`${process.env.springurl}signup`,formData2);
 
-        const response = await axios.post(
-            `http://localhost:8080/api/auth/signup`,
-            formData2
-          );
+        // const response = await axios.post(
+        //     `http://localhost:8080/api/auth/signup`,
+        //     formData2
+        //   );
+        const response = await axios.post(`${process.env.NEXT_PUBLIC_SPRING_URL}api/auth/signup`,formData2);
 
         console.log("after axios");
 
@@ -258,7 +282,7 @@ const SignupPage = () => {
         loginPage && <Login/>
     }
 
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="mt-0 min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
           Create your account
@@ -303,7 +327,7 @@ const SignupPage = () => {
                   onChange={handleChange}
                   disabled={otpData.isOtpVerified}
                 />
-                {!otpData.isOtpSent && (
+                {/* {!otpData.isOtpSent && (
                   <button
                     className="text-white bg-blue-600 hover:bg-blue-700 focus:outline-none  rounded-md"
                     type="button"
@@ -312,11 +336,24 @@ const SignupPage = () => {
                   >
                     Send OTP
                   </button>
-                )}
+                )} */}
               </div>
             </div>
+            <div style={{textAlign:"center"}}>
+  {!otpData.isOtpSent && (
+    <button
+    className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+    type="button"
+      onClick={handleSendOtp}
+    >
+      Send OTP
+    </button>
+  )}
+</div>
+
 
             {otpData.isOtpSent && !otpData.isOtpVerified && (
+              <>
               <div>
                 <label htmlFor="otp" className="block text-sm font-medium text-gray-700">
                   Enter OTP
@@ -331,18 +368,28 @@ const SignupPage = () => {
                     value={otpData.otp}
                     onChange={(e) => setOtpData(prev => ({ ...prev, otp: e.target.value }))}
                   />
-                  <button
+                  {/* <button
                     type="button"
                     onClick={handleVerifyOtp}
                     className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
                   >
                     Verify OTP
-                  </button>
+                  </button> */}
                 </div>
                 {errors.otp && (
                   <p className="mt-2 text-sm text-red-600">{errors.otp}</p>
                 )}
               </div>
+              <div>
+                <button
+                    type="button"
+                    onClick={handleVerifyOtp}
+                    className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+    >
+                    Verify OTP
+                  </button>
+              </div>
+              </>
             )}
 
             {
@@ -421,7 +468,19 @@ const SignupPage = () => {
 
             {/* Rest of the form fields */}
 
+          {
+            otpData.isOtpVerified &&
             <div>
+              <button
+                type="submit"
+                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                disabled={!otpData.isOtpVerified}
+              >
+                Sign in
+              </button>
+            </div>
+          }
+            {/* <div>
               <button
                 type="submit"
                 className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
@@ -429,7 +488,8 @@ const SignupPage = () => {
               >
                 Sign up
               </button>
-            </div>
+            </div> */}
+
           </form>
         </div>
       </div>

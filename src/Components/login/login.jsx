@@ -64,8 +64,13 @@ const Login = () => {
         formData2.append('email', formData.email);
         formData2.append('password', formData.password);
 
+        // const response = await axios.post(
+        //   'http://localhost:8080/api/auth/validate',
+        //   formData2
+        // );
+
         const response = await axios.post(
-          'http://localhost:8080/api/auth/validate',
+          `${process.env.NEXT_PUBLIC_SPRING_URL}api/auth/validate`,
           formData2
         );
 
@@ -73,7 +78,7 @@ const Login = () => {
           setSuccess(true);
           setErrors({});
           setToken(response.data.token);
-          window.location.href = "http://localhost:3000/homepage";
+          window.location.href = "/homepage";
           // Handle successful login (e.g., store token, redirect)
           // console.log('Login successful');
         }

@@ -7,7 +7,7 @@ import {QuestionsProvider} from "../context/QuestionContext";
 // import { QuestionsProvider } from "@/context/QuestionContext";
 
 // import { PushNotificationInit } from '@/components/PushNotificationInit'
-import { PushNotificationInit } from "@/Components/PushNotificationInit";
+// import { PushNotificationInit } from "@/Components/PushNotificationInit";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,7 +32,7 @@ export default function RootLayout({ children }) {
       >
 
         <QuestionsProvider>
-        <PushNotificationInit />
+        {/* <PushNotificationInit /> */}
           <HomePage>
           
             {children}

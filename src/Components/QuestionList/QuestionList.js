@@ -7,6 +7,10 @@ import Link from 'next/link';
 
 const QuestionList = () => {
 
+  const [likeCounts, setLikeCounts] = useState({});
+  const [dislikeCounts, setDislikeCounts] = useState({});
+  const [responseCount, setResponseCounts] = useState({});
+
     const tag = ["creditcard", "personalLoan"];
     const {questions2, setQuestionsData} = useQuestions();
 
@@ -29,7 +33,10 @@ const QuestionList = () => {
       // Ensure that the response contains data and it's an array of questions
       if (response.data && Array.isArray(response.data) && response.data.length > 0) {
         setQuestions(response.data);  // Set the questions data to the state
-        setQuestionsData(response.data);
+        setQuestionsData(response.data); 
+
+        // Fetch like and dislike counts for all questions
+        fetchLikeAndDislikeCounts(response.data);
 
       } else {
         console.log("No questions data found");
@@ -61,6 +68,119 @@ const QuestionList = () => {
     return `${day}-${month}-${year}`;
   };
 
+  // Function to fetch like and dislike counts for all questions
+  const fetchLikeAndDislikeCounts = async (questionsList) => {
+    try {
+        // Create temporary objects to store the counts
+        const tempLikeCounts = {};
+        const tempDislikeCounts = {};
+        const tempResponseCounts = {};
+        
+        // Fetch counts for each question
+        for (const question of questionsList) {
+            await fetchCountsForQuestion(question.id, tempLikeCounts, tempDislikeCounts);
+            try {
+              const countResponse = await axios.post(`${process.env.NEXT_PUBLIC_SPRING_URL}getResponsesOfQuestionCount`,question, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if(countResponse.status === 200){
+              tempResponseCounts[question.id] = countResponse.data;
+            }
+             
+
+            console.log("the countResponse is :: ",countResponse);
+            } catch (Error) {
+              console.log("FetchResponseCount error :: ",Error);
+            }
+        }
+        
+        // Update the state with all counts at once
+        setLikeCounts(tempLikeCounts);
+        setDislikeCounts(tempDislikeCounts);
+        setResponseCounts(tempResponseCounts);
+    } catch (error) {
+        console.log("Error fetching like/dislike counts: ", error);
+    }
+};
+
+// Function to fetch counts for a single question
+const fetchCountsForQuestion = async (questionId, tempLikeCounts, tempDislikeCounts) => {
+  try {
+      // Fetch like count
+      const formDataLike = new FormData();
+      formDataLike.append('postId', questionId);
+      const likeResponse = await axios.post(
+          `${process.env.NEXT_PUBLIC_SPRING_URL}getLikeCount`,
+          formDataLike
+      );
+      
+      if (likeResponse.status === 200) {
+          tempLikeCounts[questionId] = likeResponse.data;
+      }
+      
+      // Fetch dislike count
+      const formDataDislike = new FormData();
+      formDataDislike.append('postId', questionId);
+      const dislikeResponse = await axios.post(
+          `${process.env.NEXT_PUBLIC_SPRING_URL}getDislikeCount`,
+          formDataDislike
+      );
+      
+      if (dislikeResponse.status === 200) {
+          tempDislikeCounts[questionId] = dislikeResponse.data;
+      }
+  } catch (error) {
+      console.log(`Error fetching counts for question ${questionId}: `, error);
+      // Set default values in case of error
+      tempLikeCounts[questionId] = 0;
+      tempDislikeCounts[questionId] = 0;
+  }
+};
+
+  const handleLikeCount = async ()=>{
+    try{
+      const formData1 = new FormData();
+      formData1.append('postId', params.id);
+
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_SPRING_URL}getLikeCount`,formData1);
+
+      if(response.status === 200){
+        setLikeCount(response.data);
+      }
+
+    }catch(Error){
+      console.log(Error);
+    }
+  }
+
+  const handleDislikeCount = async ()=>{
+    try{
+      const formData1 = new FormData();
+      formData1.append('postId', params.id);
+
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_SPRING_URL}getDislikeCount`,formData1);
+
+      if(response.status === 200){
+        setDislikeCount(response.data);
+      }
+
+    }catch(Error){
+      console.log(Error);
+    }
+  }
+
+  // useEffect(()=>{
+  //   if(Object.keys(user).length !== 0){
+  //     // handleIsVoted();
+  //     handleLikeCount();
+  //     handleDislikeCount();
+  //   }
+    
+  // },[user])
+
   return (
     <>
       <div className="relative mb-6">
@@ -68,7 +188,7 @@ const QuestionList = () => {
       </div>
 
       <div className="flex justify-between items-center mb-6">
-        <div className="flex space-x-2">
+        {/* <div className="flex space-x-2">
           <button className="px-3 py-1.5 text-sm border border-gray-300 rounded-md hover:bg-gray-50">
             Latest
           </button>
@@ -78,13 +198,16 @@ const QuestionList = () => {
           <button className="px-3 py-1.5 text-sm border border-gray-300 rounded-md hover:bg-gray-50">
             Unanswered
           </button>
-        </div>
-        <div className="flex items-center space-x-2">
+        </div> */}
+        {/* <div className="flex items-center space-x-2">
           <span className="text-sm text-gray-600">Filter</span>
-        </div>
+        </div> */}
       </div>
 
-      <div className="scroll" style={{ height: '350px', overflowX: 'hidden', overflowY: 'auto', paddingRight: '10px' }}>
+      {/* <div className="scroll " style={{ height: '350px', overflowX: 'hidden', overflowY: 'auto', paddingRight: '10px' }}> */}
+      <div 
+  className="scroll overflow-x-hidden overflow-y-auto pr-3 h-[calc(100vh-100px)] md:max-h-[350px]"
+>
         <div className="space-y-4">
           {questions.length > 0 ? (
             questions.map((question) => (
@@ -93,15 +216,15 @@ const QuestionList = () => {
                   {/* Stats */}
                   <div className="flex flex-col items-center space-y-2 mr-6">
                     <div className="text-center">
-                      <div className="text-gray-600">708</div>
+                      <div className="text-gray-600">{likeCounts[question.id] || 0}</div>
                       <div className="text-sm text-gray-500">Likes</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-gray-600">18</div>
+                      <div className="text-gray-600">{responseCount[question.id]}</div>
                       <div className="text-sm text-gray-500">answers</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-gray-600">120</div>
+                      <div className="text-gray-600">{dislikeCounts[question.id] || 0}</div>
                       <div className="text-sm text-gray-500">Dislikes</div>
                     </div>
                   </div>

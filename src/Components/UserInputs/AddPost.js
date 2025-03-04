@@ -13,25 +13,31 @@ import axios from "axios";
 
 import { getToken, setToken } from '../utils/auth';
 import { decodeToken } from '../utils/auth';
+import { useRouter } from 'next/navigation';
 
 
 export default function AddPost() {
 
   const [user, setUser] = useState({});
+  const router = useRouter();
 
   useEffect(() => {
     console.log("Inside useEffect");
     const token = getToken();
     console.log("THe token is :: ", token);
     if (!token) {
-      // router.push('/login');
+      console.log("Redirecting because of no token");
+      router.push('/login');
       // setActiveContainer("LoginPage");
+      // window.location.href = "/loginPage";
     } else {
       const decodedToken = decodeToken(token);
       console.log("decoded token is :: ", decodedToken);
       if (!decodedToken || new Date(decodedToken.exp * 1000) < new Date()) {
         console.log("Inside the if");
         // setActiveContainer("LoginPage");
+        console.log("Redirecting because token has expired");
+        router.push('/login');
       } else {
         if (decodedToken && decodedToken.payload) {
           const payloadObj = JSON.parse(decodedToken.payload);
@@ -109,9 +115,10 @@ export default function AddPost() {
   const getAllTags = async () => {
     // e.preventDefault();
     try {
-      const response = await axios.get(
-        `http://localhost:8080/getAllTags`
-      );
+      // const response = await axios.get(
+      //   `http://localhost:8080/getAllTags`
+      // );
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_SPRING_URL}getAllTags`);
 
       if (response !== null) {
         console.log(response);
@@ -121,6 +128,8 @@ export default function AddPost() {
       console.log(Error);
     }
   }
+
+  
 
   const handlePostQuestion = async (e) => {
 
@@ -159,6 +168,9 @@ export default function AddPost() {
       // const response2 = await axios.post("http://localhost:8080/addpost");
 
       if(response.status === 200){
+
+        
+
         setPostData(prevState => (
           {
             ...prevState,
@@ -166,12 +178,63 @@ export default function AddPost() {
           }
         ))
 
+        console.log("The response is :: ",response);
+        const formData2 = new FormData();
+        formData2.append('actorId', user.loginId);
+        formData2.append('postId', response.data);
 
-        const response2 = await axios.post(`${process.env.NEXT_PUBLIC_SPRING_URL}api/notifications/send`,{
-          body : JSON.stringify({
-            message: 'Test notification'
-          })
-        });
+        console.log("Before sending the notification");
+
+      //   const response2 = await fetch('http://localhost:8080/api/notifications/send', formData2, {
+      //   method: 'POST',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //   },
+      //   body: JSON.stringify({
+      //     title: user.username,
+      //     message: "A new question has been posted. See if it sparks your interest!",
+      //     icon: '/icon.png',
+      //     url: window.location.origin
+      //   })
+      // });
+
+    //   const response2 = await axios.post('http://localhost:8080/api/notifications/send', 
+    //   {
+    //     title: user.username,
+    //     message: "A new question has been posted. See if it sparks your interest!",
+    //     icon: '/icon.png',
+    //     url: window.location.origin
+    //   },
+    //   {
+    //     params: {
+    //       actorId: user.loginId,
+    //       postId: response.data // The postId you got from the previous response
+    //     },
+    //     headers: {
+    //       'Content-Type': 'application/json',
+    //     }
+    //   }
+    // );
+
+    const response2 = await axios.post(`${process.env.NEXT_PUBLIC_SPRING_URL}api/notifications/send`, 
+      {
+        title: user.username,
+        message: "A new question has been posted. See if it sparks your interest!",
+        icon: '/icon.png',
+        url: window.location.origin
+      },
+      {
+        params: {
+          actorId: user.loginId,
+          postId: response.data // The postId you got from the previous response
+        },
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      }
+    );
+
+        // const response2 = await axios.post(`${process.env.NEXT_PUBLIC_SPRING_URL}api/notifications/send`, formData2);
 
          console.log("push notification response is : ",response2);
 
@@ -255,7 +318,7 @@ export default function AddPost() {
 
       <div className="flex gap-3 justify-end mt-6">
         <button
-          style={{ padding: "10px" }}
+          style={{ padding: "10px", backgroundColor:"#6039D2" }}
           className="flex items-center gap-2 px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
           onClick={handlePostQuestion}
         >

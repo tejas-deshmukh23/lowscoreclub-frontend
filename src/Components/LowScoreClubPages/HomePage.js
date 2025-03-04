@@ -15,20 +15,94 @@ import { useRouter } from 'next/router';
 import { QuestionsProvider } from "../../context/QuestionContext";
 
 import { usePathname } from 'next/navigation';
+// import { subscribeToPushNotification, unsubscribeFromPushNotification } from "../../lib/PushNotificationService";
+import PushNotificationButton from '../PushNotificationButton';
+
+// import PushNotificationButton from '../PushNotificationButton';
+
+import { getToken, setToken } from '../utils/auth';
+import { decodeToken } from '../utils/auth';
+// import { useRouter } from 'next/navigation';
+
+import { subscribeToPushNotification, unsubscribeFromPushNotification } from "../../lib/PushNotificationService";
 
 
 const HomePage = ({ children }) => {
 
+    // const [permissionStatus, setPermissionStatus] = useState('default');
+
+    const [pushNotificationFlag, setPushNotificationFlag] = useState(false);
+
+    const [user, setUser] = useState({});
+    // const router = useRouter();
+  
+    // useEffect(() => {
+      
+    // }, []);
+
     const [mounted, setMounted] = useState(false);
     const [permission, setPermission] = useState('default');
     const pathname = usePathname();
-    const childrenPaths = ['/homepage', '/'];
+    const childrenPaths = ['/homepage', '/', '/questions'];
 
     const [showComponents, setShowComponents] = useState(true);
     const [askedQuestionPanel, setAskedQuestionPanel] = useState(false);
 
     useEffect(() => {
         setMounted(true);
+
+        console.log("Inside useEffect");
+      const token = getToken();
+      console.log("THe token is :: ", token);
+      if (!token) {
+        console.log("Redirecting because of no token");
+        // router.push('/login');
+        // setActiveContainer("LoginPage");
+        // window.location.href = "/loginPage";
+      } else {
+        const decodedToken = decodeToken(token);
+        console.log("decoded token is :: ", decodedToken);
+        if (!decodedToken || new Date(decodedToken.exp * 1000) < new Date()) {
+          console.log("Inside the if");
+          // setActiveContainer("LoginPage");
+          console.log("Redirecting because token has expired");
+        //   router.push('/login');
+        } else {
+          if (decodedToken && decodedToken.payload) {
+            const payloadObj = JSON.parse(decodedToken.payload);
+            console.log("The decoded token payload is :: ", payloadObj.username);
+            console.log("THe payloadobj.loginId is :: ",payloadObj.loginId);
+  
+            setUser({
+              username: payloadObj.username,
+              // role: payloadObj.role.title,
+              loginId: payloadObj.loginId,
+            });
+  
+            //Here we will make that flag for PushNotification true so that we can ask the push notification only if the user is logged in
+            // setPushNotificationFlag(true);
+
+            if(Notification.permission !== 'granted'){
+                console.log("Not granted and its :: ", Notification.permission);
+                requestPermission(payloadObj.loginId);
+                console.log("Notification.permission is :: ",Notification.permission);
+              
+
+            }
+
+            // if ('Notification' in window) {
+            //     console.log("The notification permisssion is ------> ",Notification.requestPermission());
+            //   }
+    
+            // requestPermission();
+            // if (typeof window !== 'undefined') {
+            //   setPermission(Notification.permission);
+            // }
+
+          }
+        }
+      }
+
     }, []);
 
     
@@ -49,28 +123,42 @@ const HomePage = ({ children }) => {
 
   
 
-    useEffect(() => {
-        if (!mounted) return; 
-        requestPermission();
-        if (typeof window !== 'undefined') {
-          setPermission(Notification.permission);
-        }
-      }, [mounted]);
+    // useEffect(() => {
+    //     if (!mounted) return; 
 
-      const requestPermission = async () => {
+    //     if ('Notification' in window) {
+    //         Notification.requestPermission();
+    //       }
+
+    //     requestPermission();
+    //     if (typeof window !== 'undefined') {
+    //       setPermission(Notification.permission);
+    //     }
+    //   }, [mounted]);
+
+      const requestPermission = async (userId) => {
         try {
           const result = await Notification.requestPermission();
-          console.log("The result after getting the permission :: ",result);
           setPermission(result);
+          console.log("The result after getting the permission :: ",result);
+
+          if(result === 'granted'){
+            subscribeToPushNotification(userId);
+          }
+
         } catch (error) {
           console.error('Error requesting notification permission:', error);
         }
+
       };
     
       
+    //This useEffect is for normal notifications not push notifications
     useEffect(() => {
         if (!mounted) return; 
-        const socket = new WebSocket("ws://localhost:8080/ws/notifications");
+        // const socket = new WebSocket("ws://localhost:8080/ws/notifications");
+
+        const socket = new WebSocket(`ws://${process.env.NEXT_PUBLIC_SPRING_URL}ws/notifications`);
 
         socket.onopen = () => {
             console.log("Connected to WebSocket server");
@@ -114,6 +202,7 @@ const HomePage = ({ children }) => {
     return (
 
         <>
+     
 
             {console.log(children)}
             <div>
@@ -136,6 +225,10 @@ const HomePage = ({ children }) => {
                         {/* style={{backgroundColor:'rgb(252 246 252)'}} */}
                         <div className="min-h-screen bg-gray-50 " >
                             <div className="flex-1 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                            {/* {
+    pushNotificationFlag && 
+   <PushNotificationButton userId={user.loginId}/>
+} */}
                                 {children ? (
                                     <>
 
@@ -146,7 +239,10 @@ const HomePage = ({ children }) => {
                                                 {!showComponents && <AddPost />}
                                             </>) : (<>
                                                 {/* <QuestionsProvider> */}
-                                                {children}
+                                                
+                                                {
+                                                children
+                                                }
                                                 {/* </QuestionsProvider> */}
                                             </>))
                                         }
